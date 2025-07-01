@@ -1,0 +1,338 @@
+### Variables
+@baseUrl = http://localhost:5000/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJhZG1pbkBuYWZ0YWwuZHoiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTEyMDQ5OTQsImV4cCI6MTc1MTIxMjE5NH0.ZwTSRyRr1yoY3nPt96-ABkpccMaO6mYKNsNZLV9-GBw
+
+### Auth Routes (Employee Authentication)
+
+# Register Employee
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "nom": "admin",
+    "prénom": "admin",
+    "email": "admin@naftal.dz",
+    "password": "Admin1234",
+    "téléphone": "0555555555",
+    "matricule": "NAF003",
+    "department": "IT"
+}
+
+###
+
+# Login Employee
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@naftal.dz",
+    "password": "Admin1234"
+}
+
+###
+
+# Get current employee (protected)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Destination Routes
+
+# Create destination
+POST {{baseUrl}}/destinations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nom": "Sidi Fredj Resort",
+    "localisation": "Alger, Sidi Fredj",
+    "capacité": 10,
+    "type": "naftal_interne",
+    "description": "Centre de vacances NAFTAL avec plage privée"
+}
+
+###
+
+# Get all destinations
+GET {{baseUrl}}/destinations
+Authorization: Bearer {{token}}
+
+###
+
+# Get destination by ID
+GET {{baseUrl}}/destinations/1
+Authorization: Bearer {{token}}
+
+###
+
+# Update destination
+PUT {{baseUrl}}/destinations/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nom": "Sidi Fredj Resort Updated",
+    "localisation": "Alger, Sidi Fredj",
+    "capacité": 12,
+    "type": "naftal_interne",
+    "description": "Updated description"
+}
+
+###
+
+# Delete destination
+DELETE {{baseUrl}}/destinations/3
+Authorization: Bearer {{token}}
+
+### Employee Routes
+
+# Get all employees
+GET {{baseUrl}}/employees
+Authorization: Bearer {{token}}
+
+###
+
+# Get employee by ID
+GET {{baseUrl}}/employees/1
+Authorization: Bearer {{token}}
+
+###
+
+# Update employee
+PUT {{baseUrl}}/employees/4
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nom": "Bzr",
+    "prénom": "Islem",
+    "email": "islem.bzr@naftal.dz",
+    "password": "Password1234",
+    "téléphone": "0555555555",
+    "matricule": "NAF002",
+    "department": "IT"
+}
+
+###
+
+# Delete employee
+DELETE {{baseUrl}}/employees/3
+Authorization: Bearer {{token}}
+
+### Periode Routes
+
+# Create periode
+POST {{baseUrl}}/periodes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nom": "Vacances Été 2025",
+    "date_debut_periode": "2025-06-01",
+    "date_fin_periode": "2025-08-31",
+    "date_limite_inscription": "2025-05-20",
+    "statut": "open"
+}
+
+###
+
+# Get all periodes
+GET {{baseUrl}}/periodes
+Authorization: Bearer {{token}}
+
+###
+
+# Get periode by ID
+GET {{baseUrl}}/periodes/1
+Authorization: Bearer {{token}}
+
+###
+
+# Update periode
+PUT {{baseUrl}}/periodes/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nom": "Vacances Été 2025 Updated",
+    "date_debut_periode": "2025-06-01",
+    "date_fin_periode": "2025-08-31",
+    "date_limite_inscription": "2025-05-15",
+    "statut": "closed"
+}
+
+###
+
+# Delete periode
+DELETE {{baseUrl}}/periodes/1
+Authorization: Bearer {{token}}
+
+### Session Routes
+
+# Create session
+POST {{baseUrl}}/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nom": "Session Plage Juillet 2",
+    "date_debut": "2025-07-01",
+    "date_fin": "2025-07-15",
+    "destination_id": 3,
+    "periode_id": 2
+}
+
+###
+
+# Get all sessions
+GET {{baseUrl}}/sessions
+Authorization: Bearer {{token}}
+
+###
+
+# Get session by ID
+GET {{baseUrl}}/sessions/2
+Authorization: Bearer {{token}}
+
+###
+
+# Update session
+PUT {{baseUrl}}/sessions/2
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nom": "Session Plage Juillet Updated",
+    "date_debut": "2025-07-01",
+    "date_fin": "2025-07-15",
+    "destination_id": 3,
+    "periode_id": 2
+}
+
+###
+
+# Delete session
+DELETE {{baseUrl}}/sessions/2
+Authorization: Bearer {{token}}
+
+### Inscription Routes
+
+# Create inscription
+POST {{baseUrl}}/inscriptions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "employee_id": 1,
+    "session_id": 1,
+    "statut": ""
+}
+
+###
+
+# Get all inscriptions
+GET {{baseUrl}}/inscriptions
+Authorization: Bearer {{token}}
+
+###
+
+# Get inscription by ID
+GET {{baseUrl}}/inscriptions/1
+Authorization: Bearer {{token}}
+
+###
+
+# Get inscriptions by employee
+GET {{baseUrl}}/inscriptions/employee/1
+Authorization: Bearer {{token}}
+
+###
+
+# Get inscriptions by session
+GET {{baseUrl}}/inscriptions/session/1
+Authorization: Bearer {{token}}
+
+###
+
+# Update inscription
+PUT {{baseUrl}}/inscriptions/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "statut": "cancelled",
+}
+
+###
+
+# Delete inscription
+DELETE {{baseUrl}}/inscriptions/1
+Authorization: Bearer {{token}}
+
+### Resultat Selection Routes
+
+# Create resultat selection
+POST {{baseUrl}}/resultat-selections
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "session_id": 1,
+    "employee_id": 1,
+    "type_selection": "officiel",
+    "ordre_priorite": 1,
+}
+
+###
+
+# Get all resultat selections
+GET {{baseUrl}}/resultat-selections
+Authorization: Bearer {{token}}
+
+###
+
+# Get resultat selection by ID
+GET {{baseUrl}}/resultat-selections/1
+Authorization: Bearer {{token}}
+
+###
+
+# Get resultat selections by session
+GET {{baseUrl}}/resultat-selections/session/1
+Authorization: Bearer {{token}}
+
+###
+
+# Get resultat selections by employee
+GET {{baseUrl}}/resultat-selections/employee/1
+Authorization: Bearer {{token}}
+
+###
+
+# Update resultat selection
+PUT {{baseUrl}}/resultat-selections/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "type_selection": "en_cas",
+    "ordre_priorite": 2,
+    "commentaire": "Déplacé sur liste d'attente"
+}
+
+###
+
+# Delete resultat selection
+DELETE {{baseUrl}}/resultat-selections/1
+Authorization: Bearer {{token}}
+
+###
+
+# Generate selection for session
+POST {{baseUrl}}/resultat-selections/selection/generate/1
+Authorization: Bearer {{token}}
+
+###
+
+# Check if registration is open for periode
+GET {{baseUrl}}/periodes/3/registration-status
+Authorization: Bearer {{token}}
