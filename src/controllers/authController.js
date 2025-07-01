@@ -119,4 +119,30 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { register, login };
+const getMe = async (req, res) => {
+const token = req.cookies.token // or req.headers.authorization
+
+if (!token) {
+    return res.status(401).json({ message: 'No token, unauthorized' })
+}
+
+try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    const result = await pool.query('SELECT * FROM employee WHERE id = $1', [decoded.id])
+
+    if (result.rows.length === 0) {
+    return res.status(404).json({ message: 'User not found' })
+    }
+
+    const user = result.rows[0]
+    delete user.password // never send password
+
+    res.json(user)
+} catch (err) {
+    console.error(err)
+    res.status(401).json({ message: 'Invalid token' })
+}
+}
+
+module.exports = { register, login, getMe };

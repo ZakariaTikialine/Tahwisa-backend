@@ -2,18 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { 
     register,
-    login 
+    login ,
+    getMe
 } = require('../controllers/authController');
 const authenticateToken = require('../middlewares/authMiddleware');
 
 router.post('/register', register);
 router.post('/login', login);
 
-router.get('/me', authenticateToken ,(req, res) => {
-    res.json({
-        message: 'This is a protected route',
-        employee: req.employee 
-    });
-});
-
+router.get('/me', authenticateToken, getMe);
 module.exports = router;
