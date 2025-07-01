@@ -120,7 +120,7 @@ const login = async (req, res) => {
 };
 
 const getMe = async (req, res) => {
-const token = req.cookies.token // or req.headers.authorization
+const token = req.cookies.token
 
 if (!token) {
     return res.status(401).json({ message: 'No token, unauthorized' })
@@ -137,7 +137,6 @@ try {
 
     const user = result.rows[0]
     delete user.password // never send password
-
     res.json(user)
 } catch (err) {
     console.error(err)
