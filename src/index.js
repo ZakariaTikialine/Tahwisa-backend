@@ -7,7 +7,7 @@ app.use(cors(
     {
         origin: [
                     'http://localhost:3000',                
-                    'https://tahwisa-frontend.vercel.app'
+                    'https://tahwisa.vercel.app'
                 ],
         credentials: true
     }
