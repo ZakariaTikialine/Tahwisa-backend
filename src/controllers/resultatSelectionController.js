@@ -248,6 +248,15 @@ try {
         );
     }
     }
+    console.log("📢 Generating winners for session", session_id)
+    console.log("🎯 Selected winners:", {
+    employee_id: shuffled[i].employee_id,
+    type_selection,
+    ordre_priorite: i + 1,
+    })
+    if (shuffled.length === 0) {
+        console.log(`⚠️ No inscriptions for session ${session_id}, skipping...`)
+    }
 
     return res.status(201).json({ message: "Winners generated successfully." });
 
