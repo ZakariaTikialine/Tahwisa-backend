@@ -201,14 +201,17 @@ const getResultatSelectionsByEmployee = async (req, res) => {
 const generateWinnersForExpiredSessions = async (req, res) => {
     try {
         // 1. Get sessions whose deadline has passed AND that don't have winners yet
-        const sessionsRes = await pool.query(`
-            SELECT s.id
+        const expiredSessionsRes = await pool.query(`
+            SELECT s.id AS session_id
             FROM session s
-            LEFT JOIN resultat_selection rs ON s.id = rs.session_id
-            WHERE s.deadline < NOW() AND rs.session_id IS NULL
-        `)
+            JOIN periode p ON s.periode_id = p.id
+            WHERE p.date_limite_inscription < NOW()
+            AND NOT EXISTS (
+                SELECT 1 FROM resultat_selection rs WHERE rs.session_id = s.id
+            )
+        `);
 
-        const sessionsToGenerate = sessionsRes.rows
+        const sessionsToGenerate = expiredSessionsRes.rows
 
         if (sessionsToGenerate.length === 0) {
             return res.status(200).json({ message: "No sessions require winner generation." })
