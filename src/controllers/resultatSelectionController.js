@@ -247,7 +247,6 @@ try {
         [session_id, employee_id, type_selection, i + 1, date_selection]
         );
     }
-    }
     console.log("📢 Generating winners for session", session_id)
     console.log("🎯 Selected winners:", {
     employee_id: shuffled[i].employee_id,
@@ -256,6 +255,7 @@ try {
     })
     if (shuffled.length === 0) {
         console.log(`⚠️ No inscriptions for session ${session_id}, skipping...`)
+    }
     }
 
     return res.status(201).json({ message: "Winners generated successfully." });
