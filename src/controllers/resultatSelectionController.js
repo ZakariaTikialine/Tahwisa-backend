@@ -198,6 +198,58 @@ const getResultatSelectionsByEmployee = async (req, res) => {
     }
 };
 
+const generateWinnersForExpiredSessions = async (req, res) => {
+    try {
+        // 1. Get sessions whose deadline has passed AND that don't have winners yet
+        const sessionsRes = await pool.query(`
+            SELECT s.id
+            FROM session s
+            LEFT JOIN resultat_selection rs ON s.id = rs.session_id
+            WHERE s.deadline < NOW() AND rs.session_id IS NULL
+        `)
+
+        const sessionsToGenerate = sessionsRes.rows
+
+        if (sessionsToGenerate.length === 0) {
+            return res.status(200).json({ message: "No sessions require winner generation." })
+        }
+
+        let generatedCount = 0
+
+        for (const session of sessionsToGenerate) {
+            const { id: session_id } = session
+
+            const inscriptionsRes = await pool.query(
+                'SELECT employee_id FROM inscription WHERE session_id = $1 AND statut = $2',
+                [session_id, 'active']
+            )
+
+            const inscriptions = inscriptionsRes.rows
+            if (inscriptions.length < 3) continue
+
+            const shuffled = inscriptions.sort(() => Math.random() - 0.5)
+            const date_selection = new Date()
+
+            for (let i = 0; i < Math.min(7, shuffled.length); i++) {
+                const type_selection = i < 3 ? 'officiel' : 'suppléant'
+                await pool.query(
+                    `INSERT INTO resultat_selection (session_id, employee_id, type_selection, ordre_priorite, date_selection)
+                    VALUES ($1, $2, $3, $4, $5)`,
+                    [session_id, shuffled[i].employee_id, type_selection, i + 1, date_selection]
+                )
+            }
+
+            generatedCount++
+        }
+
+        return res.status(201).json({ message: `${generatedCount} session(s) processed.` })
+    } catch (error) {
+        console.error("Error generating winners:", error)
+        res.status(500).json({ error: "Server error while generating winners." })
+    }
+}
+
+
 
 module.exports = {
     getAllResultatSelections,
@@ -207,5 +259,6 @@ module.exports = {
     createResultatSelection,
     updateResultatSelection,
     deleteResultatSelection,
-    generateSelectionForSession
+    generateSelectionForSession,
+    generateWinnersForExpiredSessions
 };

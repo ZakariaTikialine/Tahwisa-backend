@@ -8,7 +8,8 @@ const {
     deleteResultatSelection,
     generateSelectionForSession,
     getResultatSelectionsBySession,
-    getResultatSelectionsByEmployee
+    getResultatSelectionsByEmployee,
+    generateWinnersForExpiredSessions
 } = require('../controllers/resultatSelectionController');
 const verifyToken = require('../middlewares/authMiddleware');
 const isAdmin = require('../middlewares/isAdminMiddleware');
@@ -21,5 +22,6 @@ router.delete('/:id', verifyToken, isAdmin, deleteResultatSelection);
 router.post('/selection/generate/:session_id', verifyToken, generateSelectionForSession);
 router.get('/session/:session_id', verifyToken, getResultatSelectionsBySession);
 router.get('/employee/:employee_id', verifyToken, getResultatSelectionsByEmployee);
+router.post('/winners/generate', verifyToken, isAdmin, generateWinnersForExpiredSessions);
 
 module.exports = router;
