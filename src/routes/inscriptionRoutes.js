@@ -15,12 +15,11 @@ const isAdmin = require('../middlewares/isAdminMiddleware');
 
 router.post('/', verifyToken, createInscription);
 router.get('/', verifyToken, getAllInscriptions);
-router.get('/:id', verifyToken, getInscriptionById);
+router.get('/history', verifyToken, isAdmin, getInscriptionsHistory);
 router.get('/employee/:employeeId', verifyToken, getInscriptionsByEmployee);
 router.get('/session/:sessionId', verifyToken, getInscriptionsBySession);
+router.get('/:id', verifyToken, getInscriptionById);
 router.put('/:id', verifyToken, updateInscription);
 router.delete('/:id', verifyToken, isAdmin, deleteInscription);
-router.get('/history', verifyToken, isAdmin, getInscriptionsHistory)
 
-
-module.exports = router;    
+module.exports = router;
