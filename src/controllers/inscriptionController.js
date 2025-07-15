@@ -282,12 +282,39 @@ const getInscriptionsHistory = async (req, res) => {
     }
 };
 
+const getInscriptionsWithResultat = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        i.*,
+        e.nom AS employee_nom,
+        e.prénom AS employee_prenom,
+        s.nom AS session_nom,
+        p.date_limite_inscription AS deadline,
+        rs.type_selection,
+        rs.ordre_priorite,
+        rs.date_selection
+      FROM inscription i
+      LEFT JOIN employee e ON i.employee_id = e.id
+      LEFT JOIN session s ON i.session_id = s.id
+      LEFT JOIN periode p ON s.periode_id = p.id
+      LEFT JOIN resultat_selection rs 
+        ON i.employee_id = rs.employee_id AND i.session_id = rs.session_id
+      ORDER BY i.date_inscription DESC
+    `);
 
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching inscription+resultat history:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
 module.exports = {
     getAllInscriptions,
     getInscriptionById,
     getInscriptionsByEmployee,
+    getInscriptionsWithResultat,
     getInscriptionsBySession,
     createInscription,
     updateInscription,
