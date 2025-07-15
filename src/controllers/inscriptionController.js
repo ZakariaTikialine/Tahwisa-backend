@@ -266,13 +266,13 @@ const getInscriptionsHistory = async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT 
-                i.id, i.employee_id, i.session_id, i.date_inscription, i.statut,
-                e.nom AS employee_nom, e.prénom AS employee_prenom,
-                s.nom AS session_nom,
-                EXTRACT(YEAR FROM i.date_inscription) AS year
+            i.id, i.employee_id, i.session_id, i.date_inscription, i.statut,
+            e.nom AS employee_nom, e.prénom AS employee_prenom,
+            s.nom AS session_nom,
+            EXTRACT(YEAR FROM i.date_inscription) AS year
             FROM inscription i
-            JOIN employee e ON i.employee_id = e.id
-            JOIN session s ON i.session_id = s.id
+            LEFT JOIN employee e ON i.employee_id = e.id
+            LEFT JOIN session s ON i.session_id = s.id
             ORDER BY i.date_inscription DESC
         `);
         res.json(result.rows);
