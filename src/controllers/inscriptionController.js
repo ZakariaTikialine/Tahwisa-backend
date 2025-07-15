@@ -266,10 +266,10 @@ const getInscriptionsHistory = async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT 
-            i.id, i.employee_id, i.session_id, i.date_inscription, i.statut,
-            e.nom AS employee_nom, e.prénom AS employee_prenom,
-            s.nom AS session_nom,
-            EXTRACT(YEAR FROM i.date_inscription) AS year
+                i.id, i.employee_id, i.session_id, i.date_inscription, i.statut,
+                e.nom AS employee_nom, e."prénom" AS employee_prenom,
+                s.nom AS session_nom,
+                EXTRACT(YEAR FROM i.date_inscription) AS year
             FROM inscription i
             LEFT JOIN employee e ON i.employee_id = e.id
             LEFT JOIN session s ON i.session_id = s.id
@@ -277,10 +277,11 @@ const getInscriptionsHistory = async (req, res) => {
         `);
         res.json(result.rows);
     } catch (err) {
-        console.error("❌ Error in getInscriptionsHistory:", err);
+        console.error("❌ Error in /api/inscriptions/history:", err);
         res.status(500).json({ error: err.message });
     }
-}
+};
+
 
 
 module.exports = {
