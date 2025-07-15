@@ -7,7 +7,8 @@ const {
     getInscriptionsByEmployee,
     getInscriptionsBySession,
     updateInscription,
-    deleteInscription
+    deleteInscription,
+    getInscriptionsHistory
 } = require('../controllers/inscriptionController');
 const verifyToken = require('../middlewares/authMiddleware');
 const isAdmin = require('../middlewares/isAdminMiddleware');
@@ -19,5 +20,7 @@ router.get('/employee/:employeeId', verifyToken, getInscriptionsByEmployee);
 router.get('/session/:sessionId', verifyToken, getInscriptionsBySession);
 router.put('/:id', verifyToken, updateInscription);
 router.delete('/:id', verifyToken, isAdmin, deleteInscription);
+router.get('/history', verifyToken, isAdmin, getInscriptionsHistory)
+
 
 module.exports = router;    
