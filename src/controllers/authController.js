@@ -37,7 +37,6 @@ const register = async (req, res) => {
     }
 
     try {
-        // Check for existing employee with same email or matricule in a single query
         const existingEmployee = await pool.query(
             'SELECT email, matricule FROM employee WHERE email = $1 OR matricule = $2',
             [email, matricule]
@@ -60,7 +59,7 @@ const register = async (req, res) => {
         const result = await pool.query(
             `INSERT INTO employee 
             (nom, prénom, email, password, téléphone, matricule, department, 
-            email_verification_token, email_verification_token_expires)
+            emailverificationtoken, emailverificationtokenexpires)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING id, nom, prénom, email, téléphone, matricule, department`,
             [nom, prénom, email, hashedPassword, téléphone, matricule, department, 
@@ -183,11 +182,11 @@ const verifyEmail = async (req, res) => {
 
         const result = await pool.query(
             `UPDATE employee 
-            SET email_verified = true,
-                email_verification_token = NULL,
-                email_verification_token_expires = NULL
-            WHERE email_verification_token = $1 
-            AND email_verification_token_expires > NOW()
+            SET emailverified = true,
+                emailverificationtoken = NULL,
+                emailverificationtokenexpires = NULL
+            WHERE emailverificationtoken = $1 
+            AND emailverificationtokenexpires > NOW()
             RETURNING *`,
             [token]
         );
@@ -233,8 +232,8 @@ const resendVerificationEmail = async (req, res) => {
 
         await pool.query(
             `UPDATE employee
-            SET email_verification_token = $1,
-                email_verification_token_expires = $2
+            SET emailverificationtoken = $1,
+                emailverificationtokenexpires = $2
             WHERE email = $3`,
             [verificationToken, verificationTokenExpires, email]
         );
@@ -278,8 +277,8 @@ const requestPasswordReset = async (req, res) => {
 
             await pool.query(
                 `UPDATE employee
-                SET password_reset_token = $1,
-                    password_reset_token_expires = $2
+                SET passwordresettoken = $1,
+                    passwordresettokenexpires = $2
                 WHERE email = $3`,
                 [resetToken, resetTokenExpires, email]
             );
@@ -324,10 +323,10 @@ const resetPassword = async (req, res) => {
         const result = await pool.query(
             `UPDATE employee
             SET password = $1,
-                password_reset_token = NULL,
-                password_reset_token_expires = NULL
-            WHERE password_reset_token = $2
-            AND password_reset_token_expires > NOW()
+                passwordresettoken = NULL,
+                passwordresettokenexpires = NULL
+            WHERE passwordresettoken = $2
+            AND passwordresettokenexpires > NOW()
             RETURNING *`,
             [hashedPassword, token]
         );
