@@ -120,7 +120,7 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        if (!employee.email_verified) {
+        if (!employee.emailverified) {
             return res.status(403).json({ 
                 code: 'EMAIL_NOT_VERIFIED',
                 message: 'Please verify your email before logging in'
@@ -221,7 +221,7 @@ const resendVerificationEmail = async (req, res) => {
 
         const employee = result.rows[0];
 
-        if (employee.email_verified) {
+        if (employee.emailverified) {
             return res.status(400).json({ 
                 message: 'Email is already verified' 
             });
