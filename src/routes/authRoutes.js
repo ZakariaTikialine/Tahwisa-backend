@@ -1,22 +1,17 @@
+// authRoutes.js - Corrected example
 const express = require('express');
 const router = express.Router();
-const { 
-    register,
-    login ,
-    getMe,
-    sendVerificationEmail,
-    verifyEmail,
-    requestPasswordReset,
-    resetPassword
-} = require('../controllers/authController');
-const authenticateToken = require('../middlewares/authMiddleware');
+const authController = require('../controllers/authController'); // Verify this path
 
-router.post('/register', register);
-router.post('/login', login);
+// Make sure these functions exist in your authController
+router.post('/register', authController.register); 
+router.post('/login', authController.login);
+router.get('/me', authController.getMe);
 
-router.get('/me', authenticateToken, getMe);
-router.post('/send-verification-email', sendVerificationEmail);
-router.post('/verify-email', verifyEmail);
-router.post('/request-password-reset', requestPasswordReset);
-router.post('/reset-password', resetPassword);
+// New routes - ensure these functions exist
+router.post('/verify-email', authController.verifyEmail);
+router.post('/resend-verification', authController.resendVerificationEmail);
+router.post('/request-password-reset', authController.requestPasswordReset);
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;
