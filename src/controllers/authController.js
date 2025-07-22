@@ -140,8 +140,11 @@ const login = async (req, res) => {
                 id: employee.id,
                 nom: employee.nom,
                 prénom: employee.prénom,
+                téléphone: employee.téléphone,
+                matricule: employee.matricule,
                 email: employee.email,
-                department: employee.department
+                department: employee.department,
+                role: employee.role,
             }
         });
     } catch (error) {
