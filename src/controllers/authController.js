@@ -160,17 +160,47 @@ const getMe = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const result = await pool.query('SELECT * FROM employee WHERE id = $1', [decoded.id]);
+        // Always fetch fresh data from database
+        const result = await pool.query(`
+            SELECT id, nom, prénom, email, téléphone, matricule, 
+            department, role, emailverified
+            FROM employee 
+            WHERE id = $1
+        `, [decoded.id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
         const user = result.rows[0];
-        delete user.password;
-        res.json(user);
+        
+        // Verify token hasn't been invalidated by role change
+        if (decoded.role !== user.role) {
+            return res.status(401).json({ 
+                code: 'ROLE_CHANGED',
+                message: 'Session expired due to role change' 
+            });
+        }
+
+        res.json({
+            id: user.id,
+            nom: user.nom,
+            prénom: user.prénom,
+            email: user.email,
+            téléphone: user.téléphone,
+            matricule: user.matricule,
+            department: user.department,
+            role: user.role,
+            emailverified: user.emailverified
+        });
     } catch (err) {
         console.error(err);
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                code: 'TOKEN_EXPIRED',
+                message: 'Session expired' 
+            });
+        }
         res.status(401).json({ message: 'Invalid token' });
     }
 };
