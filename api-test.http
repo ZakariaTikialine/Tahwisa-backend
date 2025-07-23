@@ -15,7 +15,7 @@ Content-Type: application/json
     "password": "Admin1234",
     "téléphone": "0555555555",
     "matricule": "NAF003",
-    "department": "IT"
+    "structure": "IT"
 }
 
 ###
@@ -109,7 +109,7 @@ Content-Type: application/json
     "password": "Password1234",
     "téléphone": "0555555555",
     "matricule": "NAF002",
-    "department": "IT"
+    "structure": "IT"
 }
 
 ###

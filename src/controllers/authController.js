@@ -4,13 +4,13 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { addHours } = require('date-fns');
 const { sendEmail } = require('../services/emailService');
-const { validateName, validateEmail, validatePassword, validatePhone, validateMatricule, validateDepartment } = require('../utils/validators');
+const { validateName, validateEmail, validatePassword, validatePhone, validateMatricule, validateStructure } = require('../utils/validators');
 
 // Updated register function
 const register = async (req, res) => {
-    const { nom, prénom, email, password, téléphone, matricule, department } = req.body;
+    const { nom, prénom, email, password, téléphone, matricule, structure } = req.body;
 
-    if (!nom || !prénom || !email || !password || !téléphone || !matricule || !department) {
+    if (!nom || !prénom || !email || !password || !téléphone || !matricule || !structure) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -32,8 +32,8 @@ const register = async (req, res) => {
     if (!validateMatricule(matricule)) {
         return res.status(400).json({ message: 'Invalid matricule: must be 3-20 alphanumeric characters' });
     }
-    if (!validateDepartment(department)) {
-        return res.status(400).json({ message: 'Invalid department: must be one of IT, HR, Finance, Marketing, Operations, Sales' });
+    if (!validateStructure(structure)) {
+        return res.status(400).json({ message: 'Invalid structure: must be one of IT, HR, Finance, Marketing, Operations, Sales' });
     }
 
     try {
@@ -58,11 +58,11 @@ const register = async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO employee 
-            (nom, prénom, email, password, téléphone, matricule, department, 
+            (nom, prénom, email, password, téléphone, matricule, structure, 
             emailverificationtoken, emailverificationtokenexpires)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            RETURNING id, nom, prénom, email, téléphone, matricule, department`,
-            [nom, prénom, email, hashedPassword, téléphone, matricule, department, 
+            RETURNING id, nom, prénom, email, téléphone, matricule, structure`,
+            [nom, prénom, email, hashedPassword, téléphone, matricule, structure, 
             verificationToken, verificationTokenExpires]
         );
 
@@ -143,7 +143,7 @@ const login = async (req, res) => {
                 téléphone: employee.téléphone,
                 matricule: employee.matricule,
                 email: employee.email,
-                department: employee.department,
+                structure: employee.structure,
                 role: employee.role,
             }
         });
@@ -166,7 +166,7 @@ const getMe = async (req, res) => {
         // Always fetch fresh data from database
         const result = await pool.query(`
             SELECT id, nom, prénom, email, téléphone, matricule, 
-            department, role, emailverified
+            structure, role, emailverified
             FROM employee 
             WHERE id = $1
         `, [decoded.id]);
@@ -192,7 +192,7 @@ const getMe = async (req, res) => {
             email: user.email,
             téléphone: user.téléphone,
             matricule: user.matricule,
-            department: user.department,
+            structure: user.structure,
             role: user.role,
             emailverified: user.emailverified
         });

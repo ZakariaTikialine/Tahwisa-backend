@@ -23,9 +23,9 @@ const validateName = (name) => {
     return nameRegex.test(name);
 };
 
-const validateDepartment = (department) => {
-    const validDepartments = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Sales'];
-    return validDepartments.includes(department);
+const validateStructure = (structure) => {
+    const validStructures = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Sales'];
+    return validStructures.includes(structure);
 };
 
 module.exports = {
@@ -34,5 +34,5 @@ module.exports = {
     validateMatricule,
     validatePhone,
     validateName,
-    validateDepartment
+    validateStructure
 };

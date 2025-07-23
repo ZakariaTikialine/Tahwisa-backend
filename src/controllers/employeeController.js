@@ -29,10 +29,10 @@ const getEmployeeById = async (req, res) => {
 // Update employee
 const updateEmployee = async (req, res) => {
     const { id } = req.params;
-    const { nom, prénom, email, password, téléphone, matricule, department } = req.body;
+    const { nom, prénom, email, password, téléphone, matricule, structure } = req.body;
 
     // Validate required fields
-    if (!nom || !prénom || !email || !password || !téléphone || !matricule || !department) {
+    if (!nom || !prénom || !email || !password || !téléphone || !matricule || !structure) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -61,10 +61,10 @@ const updateEmployee = async (req, res) => {
         // Perform the update
         const result = await pool.query(
             `UPDATE employee 
-            SET nom = $1, prénom = $2, email = $3, password = $4, téléphone = $5, matricule = $6, department = $7 
+            SET nom = $1, prénom = $2, email = $3, password = $4, téléphone = $5, matricule = $6, structure = $7 
             WHERE id = $8 
-            RETURNING id, nom, prénom, email, téléphone, matricule, department`,
-            [nom, prénom, email, hashedPassword, téléphone, matricule, department, id]
+            RETURNING id, nom, prénom, email, téléphone, matricule, structure`,
+            [nom, prénom, email, hashedPassword, téléphone, matricule, structure, id]
         );
 
         if (result.rows.length === 0) {
