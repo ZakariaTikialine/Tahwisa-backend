@@ -198,76 +198,134 @@ const getResultatSelectionsByEmployee = async (req, res) => {
     }
 };
 
-const generateWinnersForExpiredSessions = async (req, res) => {
-try {
-    // Step 1: Find sessions whose deadline has passed and winners not yet generated
-    const expiredSessionsRes = await pool.query(`
-    SELECT s.id AS session_id
-    FROM session s
-    JOIN periode p ON s.periode_id = p.id
-    WHERE p.date_limite_inscription < NOW()
-    AND NOT EXISTS (
-        SELECT 1 FROM resultat_selection rs WHERE rs.session_id = s.id
-    )
-    `);
+// Add these two functions to your resultatSelectionController.js
 
-    const expiredSessions = expiredSessionsRes.rows;
-
-    if (expiredSessions.length === 0) {
-    return res.status(200).json({ message: "No sessions eligible for winner generation" });
+// ✅ Get all employees eligible for winner selection
+const getEligibleEmployees = async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT DISTINCT 
+                e.id, 
+                e.nom, 
+                e.prénom, 
+                e.structue,
+                s.id as session_id, 
+                s.nom as session_nom
+            FROM employee e
+            JOIN inscription i ON e.id = i.employee_id 
+            JOIN session s ON i.session_id = s.id
+            JOIN periode p ON s.periode_id = p.id
+            WHERE i.statut = 'active' 
+            AND p.date_limite_inscription < NOW()
+            AND NOT EXISTS (
+                SELECT 1 FROM resultat_selection rs 
+                WHERE rs.employee_id = e.id AND rs.session_id = s.id
+            )
+            ORDER BY s.nom, e.nom, e.prénom
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
-    const date_selection = new Date();
-
-    for (const session of expiredSessions) {
-    const session_id = session.session_id;
-
-    // Step 2: Get all active inscriptions for this session
-    const inscriptionsRes = await pool.query(
-        'SELECT employee_id FROM inscription WHERE session_id = $1 AND statut = $2',
-        [session_id, 'active']
-    );
-    const inscriptions = inscriptionsRes.rows;
-
-    if (inscriptions.length < 3) {
-        console.log(`Skipping session ${session_id}: not enough inscriptions`);
-        continue;
-    }
-
-    // Step 3: Shuffle and pick 3 official, 4 alternates
-    const shuffled = inscriptions.sort(() => Math.random() - 0.5);
-
-    for (let i = 0; i < Math.min(7, shuffled.length); i++) {
-        const type_selection = i < 3 ? 'officiel' : 'suppléant';
-        const employee_id = shuffled[i].employee_id;
-
-        await pool.query(
-        `INSERT INTO resultat_selection (session_id, employee_id, type_selection, ordre_priorite, date_selection)
-        VALUES ($1, $2, $3, $4, $5)`,
-        [session_id, employee_id, type_selection, i + 1, date_selection]
-        );
-    }
-    console.log("📢 Generating winners for session", session_id)
-    console.log("🎯 Selected winners:", {
-    employee_id: shuffled[i].employee_id,
-    type_selection,
-    ordre_priorite: i + 1,
-    })
-    if (shuffled.length === 0) {
-        console.log(`⚠️ No inscriptions for session ${session_id}, skipping...`)
-    }
-    }
-
-    return res.status(201).json({ message: "Winners generated successfully." });
-
-} catch (error) {
-    console.error("Error generating winners:", error);
-    res.status(500).json({ message: "Internal server error" });
-}
 };
 
+// ✅ Enhanced generateWinnersForExpiredSessions with return data
+const generateWinnersForExpiredSessions = async (req, res) => {
+    try {
+        // Step 1: Find sessions whose deadline has passed and winners not yet generated
+        const expiredSessionsRes = await pool.query(`
+            SELECT s.id AS session_id, s.nom as session_nom
+            FROM session s
+            JOIN periode p ON s.periode_id = p.id
+            WHERE p.date_limite_inscription < NOW()
+            AND NOT EXISTS (
+                SELECT 1 FROM resultat_selection rs WHERE rs.session_id = s.id
+            )
+        `);
 
+        const expiredSessions = expiredSessionsRes.rows;
 
+        if (expiredSessions.length === 0) {
+            return res.status(200).json({ 
+                message: "No sessions eligible for winner generation",
+                selectedEmployees: [],
+                sessionsProcessed: 0
+            });
+        }
+
+        const date_selection = new Date();
+        const allSelectedEmployees = [];
+
+        for (const session of expiredSessions) {
+            const session_id = session.session_id;
+
+            // Step 2: Get all active inscriptions for this session
+            const inscriptionsRes = await pool.query(
+                'SELECT employee_id FROM inscription WHERE session_id = $1 AND statut = $2',
+                [session_id, 'active']
+            );
+            const inscriptions = inscriptionsRes.rows;
+
+            if (inscriptions.length < 3) {
+                console.log(`Skipping session ${session_id}: not enough inscriptions`);
+                continue;
+            }
+
+            // Step 3: Shuffle and pick 3 official, 4 alternates
+            const shuffled = inscriptions.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < Math.min(7, shuffled.length); i++) {
+                const type_selection = i < 3 ? 'officiel' : 'suppléant';
+                const employee_id = shuffled[i].employee_id;
+
+                await pool.query(
+                    `INSERT INTO resultat_selection (session_id, employee_id, type_selection, ordre_priorite, date_selection)
+                    VALUES ($1, $2, $3, $4, $5)`,
+                    [session_id, employee_id, type_selection, i + 1, date_selection]
+                );
+
+                // Store for response
+                allSelectedEmployees.push({
+                    session_id,
+                    session_nom: session.session_nom,
+                    employee_id,
+                    type_selection,
+                    ordre_priorite: i + 1
+                });
+            }
+
+            console.log("📢 Generated winners for session", session_id);
+        }
+
+        // Step 4: Get complete winner details for response
+        const winnersRes = await pool.query(`
+            SELECT 
+                rs.*, 
+                e.nom AS employee_nom, 
+                e.prénom AS employee_prenom,
+                e.structue AS employee_structue,
+                s.nom AS session_nom
+            FROM resultat_selection rs
+            JOIN employee e ON rs.employee_id = e.id
+            JOIN session s ON rs.session_id = s.id
+            WHERE rs.date_selection >= $1
+            ORDER BY rs.session_id, rs.ordre_priorite
+        `, [date_selection]);
+
+        return res.status(201).json({ 
+            message: "Winners generated successfully",
+            selectedEmployees: winnersRes.rows,
+            sessionsProcessed: expiredSessions.length,
+            totalWinners: winnersRes.rows.length
+        });
+
+    } catch (error) {
+        console.error("Error generating winners:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// Don't forget to export the new function
 module.exports = {
     getAllResultatSelections,
     getResultatSelectionById,
@@ -277,5 +335,6 @@ module.exports = {
     updateResultatSelection,
     deleteResultatSelection,
     generateSelectionForSession,
-    generateWinnersForExpiredSessions
+    generateWinnersForExpiredSessions,
+    getEligibleEmployees
 };

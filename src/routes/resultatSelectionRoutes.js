@@ -9,7 +9,8 @@ const {
     generateSelectionForSession,
     getResultatSelectionsBySession,
     getResultatSelectionsByEmployee,
-    generateWinnersForExpiredSessions
+    generateWinnersForExpiredSessions,
+    getEligibleEmployees
 } = require('../controllers/resultatSelectionController');
 const verifyToken = require('../middlewares/authMiddleware');
 const isAdmin = require('../middlewares/isAdminMiddleware');
@@ -23,5 +24,6 @@ router.post('/selection/generate/:session_id', verifyToken, generateSelectionFor
 router.get('/session/:session_id', verifyToken, getResultatSelectionsBySession);
 router.get('/employee/:employee_id', verifyToken, getResultatSelectionsByEmployee);
 router.post('/winners/generate', verifyToken, isAdmin, generateWinnersForExpiredSessions);
+router.get('/eligible-employees', verifyToken, getEligibleEmployees);
 
 module.exports = router;
