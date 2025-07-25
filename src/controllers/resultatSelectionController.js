@@ -198,9 +198,6 @@ const getResultatSelectionsByEmployee = async (req, res) => {
     }
 };
 
-// Add these two functions to your resultatSelectionController.js
-
-// ✅ Get all employees eligible for winner selection
 const getEligibleEmployees = async (req, res) => {
     try {
         const result = await pool.query(`
@@ -208,7 +205,7 @@ const getEligibleEmployees = async (req, res) => {
                 e.id, 
                 e.nom, 
                 e.prénom, 
-                e.structue,
+                e.structure,
                 s.id as session_id, 
                 s.nom as session_nom
             FROM employee e
@@ -303,7 +300,7 @@ const generateWinnersForExpiredSessions = async (req, res) => {
                 rs.*, 
                 e.nom AS employee_nom, 
                 e.prénom AS employee_prenom,
-                e.structue AS employee_structue,
+                e.structure AS employee_structure,
                 s.nom AS session_nom
             FROM resultat_selection rs
             JOIN employee e ON rs.employee_id = e.id
@@ -335,6 +332,6 @@ module.exports = {
     updateResultatSelection,
     deleteResultatSelection,
     generateSelectionForSession,
-    generateWinnersForExpiredSessions,
-    getEligibleEmployees
+    generateWinnersForExpiredSessions, // ✅ Updated function
+    getEligibleEmployees // ✅ New function
 };
